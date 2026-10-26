@@ -1,7 +1,9 @@
 'use strict';
 
-const User = require('./User');
+const User          = require('./User');
+const HealthProfile = require('./HealthProfile');
 
 module.exports = {
-  User
+  User,
+  HealthProfile
 };
