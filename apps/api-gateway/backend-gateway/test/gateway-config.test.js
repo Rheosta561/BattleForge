@@ -22,10 +22,20 @@ const pipelineStep = name =>
 test('gateway.config.yml declares firebase-auth as an available policy', () => {
   assert.ok(Array.isArray(gatewayConfig.policies));
   assert.ok(gatewayConfig.policies.includes('firebase-auth'));
+  assert.ok(gatewayConfig.policies.includes('lagertha-auth'));
+  assert.ok(gatewayConfig.policies.includes('lagertha-session'));
 });
 
-test('existing pipeline order is preserved with firebase-auth inserted before proxy', () => {
-  assert.deepEqual(pipelinePolicyNames(), ['rate-limit', 'log', 'firebase-auth', 'proxy']);
+test('application access-token policy runs before the existing Firebase policy and proxy', () => {
+  assert.deepEqual(pipelinePolicyNames(), ['rate-limit', 'log', 'lagertha-auth', 'firebase-auth', 'proxy']);
+  const sessionPolicies = gatewayConfig.pipelines['auth-session-pipeline'].policies;
+  assert.deepEqual(sessionPolicies.map(step => Object.keys(step)[0]), [
+    'rate-limit',
+    'log',
+    'lagertha-session'
+  ]);
+  assert.deepEqual(sessionPolicies[0]['rate-limit'][0].action, pipelineStep('rate-limit')[0].action);
+  assert.equal(sessionPolicies[1].log[0].action.message, '${req.method} ${req.originalUrl}');
 });
 
 test('rate-limit configuration is untouched', () => {
@@ -45,13 +55,15 @@ test('log configuration is untouched', () => {
 
 test('firebase-auth action exposes a publicPaths list', () => {
   const action = pipelineStep('firebase-auth')[0].action;
-  assert.deepEqual(action.publicPaths, ['/health']);
+  assert.deepEqual(action.publicPaths, ['/health', '/users', '/users/*']);
 });
 
 test('proxy still targets the user-service endpoint', () => {
   assert.equal(pipelineStep('proxy')[0].action.serviceEndpoint, 'user-service');
   assert.equal(gatewayConfig.serviceEndpoints['user-service'].url, 'http://localhost:3000');
   assert.deepEqual(gatewayConfig.apiEndpoints['user-api'].paths, ['/users', '/users/*', '/health']);
+  assert.deepEqual(gatewayConfig.apiEndpoints['auth-api'].paths, ['/auth/session']);
+  assert.deepEqual(gatewayConfig.apiEndpoints['auth-api'].methods, ['POST']);
 });
 
 test('system.config.yml registers the firebase-auth plugin', () => {

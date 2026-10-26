@@ -3,3 +3,5 @@ version: 1.0.0
 description: Firebase ID token verification policy for the gateway
 policies:
   - firebase-auth
+  - lagertha-auth
+  - lagertha-session

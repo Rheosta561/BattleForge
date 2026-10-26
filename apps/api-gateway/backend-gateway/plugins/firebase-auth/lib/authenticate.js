@@ -217,5 +217,9 @@ async function authenticate (req, res, next, options = {}) {
 
 module.exports = {
   authenticate,
-  setLogger
+  setLogger,
+  readBearerToken,
+  readCookieToken,
+  isPublicRoute,
+  verifyFirebaseIdToken: verifyIdToken
 };

@@ -6,6 +6,8 @@
 require('../../config/firebase');
 
 const policy = require('./policies/firebase-auth');
+const lagerthaAuthPolicy = require('./policies/lagertha-auth');
+const lagerthaSessionPolicy = require('./policies/lagertha-session');
 const { setLogger } = require('./lib/authenticate');
 
 module.exports = {
@@ -18,6 +20,8 @@ module.exports = {
   init (pluginContext) {
     setLogger(pluginContext.logger);
     pluginContext.registerPolicy(policy);
+    pluginContext.registerPolicy(lagerthaAuthPolicy);
+    pluginContext.registerPolicy(lagerthaSessionPolicy);
     pluginContext.logger.debug('firebase-auth: policy registered');
   }
 };

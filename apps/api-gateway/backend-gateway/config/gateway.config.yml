@@ -10,6 +10,12 @@ apiEndpoints:
       - '/users'
       - '/users/*'
       - '/health'
+  auth-api:
+    host: '*'
+    paths:
+      - '/auth/session'
+    methods:
+      - POST
   # see: http://www.express-gateway.io/docs/configuration/gateway.config.yml/apiEndpoints
 serviceEndpoints:
   # see: http://www.express-gateway.io/docs/configuration/gateway.config.yml/serviceEndpoints
@@ -22,6 +28,8 @@ policies:
   - firebase-auth
   - key-auth
   - log
+  - lagertha-auth
+  - lagertha-session
   - oauth2
   - proxy
   - rate-limit
@@ -42,13 +50,35 @@ pipelines:
       - log:
           - action:
               message : "${req.method} ${req.originalUrl}"
-      - firebase-auth:
+      - lagertha-auth:
           - action:
-              # Routes that skip Firebase verification: exact paths, or a
-              # trailing * prefix match (e.g. "/health*"). Authentication
-              # endpoints and other public routes go here.
               publicPaths:
                 - '/health'
+      - firebase-auth:
+          - action:
+              # /users is protected by lagertha-auth; Firebase ID tokens are
+              # verified by lagertha-session when establishing an app session.
+              publicPaths:
+                - '/health'
+                - '/users'
+                - '/users/*'
       - proxy:
           - action:
               serviceEndpoint: user-service
+  auth-session-pipeline:
+    apiEndpoints:
+      - auth-api
+    policies:
+      - rate-limit:
+          - action:
+               max: 10
+               windowMs: 60000
+               delayAfter: 0
+               delayMs: 0
+               statusCode: 429
+               headers: true
+      - log:
+          - action:
+              message: "${req.method} ${req.originalUrl}"
+      - lagertha-session:
+          - action: {}

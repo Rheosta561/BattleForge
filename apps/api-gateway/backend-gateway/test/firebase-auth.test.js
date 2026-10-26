@@ -398,8 +398,10 @@ test('plugin registers its policy through the express-gateway plugin API', () =>
     logger: { debug () {} }
   });
 
-  assert.equal(registered.length, 1);
+  assert.equal(registered.length, 3);
   assert.equal(registered[0].name, 'firebase-auth');
   assert.equal(typeof registered[0].policy, 'function');
   assert.equal(registered[0].schema.$id, 'http://express-gateway.io/schemas/policies/firebase-auth.json');
+  assert.equal(registered[1].name, 'lagertha-auth');
+  assert.equal(registered[2].name, 'lagertha-session');
 });
