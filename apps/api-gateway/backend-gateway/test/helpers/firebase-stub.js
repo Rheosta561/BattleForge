@@ -47,7 +47,9 @@ const stubExports = {
     // Delegates through a mutable binding so tests can swap the verifier
     // after this module has been loaded.
     verifyIdToken: token => verifyIdToken(token)
-  }
+  },
+  getFirestoreDb: () => null,
+  firestore: null
 };
 
 require.cache[FIREBASE_MODULE_PATH] = {

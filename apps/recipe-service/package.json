@@ -1,0 +1,13 @@
+{
+  "name": "recipe-service",
+  "version": "1.0.0",
+  "description": "Lagertha recipe repository and meal planning microservice",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

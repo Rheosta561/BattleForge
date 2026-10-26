@@ -16,6 +16,24 @@ apiEndpoints:
       - '/auth/session'
     methods:
       - POST
+  auth-refresh-api:
+    host: '*'
+    paths:
+      - '/auth/refresh'
+    methods:
+      - POST
+  auth-logout-api:
+    host: '*'
+    paths:
+      - '/auth/logout'
+    methods:
+      - POST
+  auth-me-api:
+    host: '*'
+    paths:
+      - '/auth/me'
+    methods:
+      - GET
   # see: http://www.express-gateway.io/docs/configuration/gateway.config.yml/apiEndpoints
 serviceEndpoints:
   # see: http://www.express-gateway.io/docs/configuration/gateway.config.yml/serviceEndpoints
@@ -82,3 +100,59 @@ pipelines:
               message: "${req.method} ${req.originalUrl}"
       - lagertha-session:
           - action: {}
+  auth-refresh-pipeline:
+    apiEndpoints:
+      - auth-refresh-api
+    policies:
+      - rate-limit:
+          - action:
+               max: 10
+               windowMs: 60000
+               delayAfter: 0
+               delayMs: 0
+               statusCode: 429
+               headers: true
+      - log:
+          - action:
+              message: "${req.method} ${req.originalUrl}"
+      - lagertha-session:
+          - action:
+              action: refresh
+  auth-logout-pipeline:
+    apiEndpoints:
+      - auth-logout-api
+    policies:
+      - rate-limit:
+          - action:
+               max: 10
+               windowMs: 60000
+               delayAfter: 0
+               delayMs: 0
+               statusCode: 429
+               headers: true
+      - log:
+          - action:
+              message: "${req.method} ${req.originalUrl}"
+      - lagertha-session:
+          - action:
+              action: logout
+  auth-me-pipeline:
+    apiEndpoints:
+      - auth-me-api
+    policies:
+      - rate-limit:
+          - action:
+               max: 10
+               windowMs: 60000
+               delayAfter: 0
+               delayMs: 0
+               statusCode: 429
+               headers: true
+      - log:
+          - action:
+              message: "${req.method} ${req.originalUrl}"
+      - lagertha-auth:
+          - action: {}
+      - lagertha-session:
+          - action:
+              action: me

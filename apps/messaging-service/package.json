@@ -1,0 +1,13 @@
+{
+  "name": "messaging-service",
+  "version": "1.0.0",
+  "description": "Lagertha real-time messaging and conversation microservice",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

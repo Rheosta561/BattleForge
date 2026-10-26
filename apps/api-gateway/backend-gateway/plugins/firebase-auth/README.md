@@ -44,11 +44,36 @@ The gateway fails pipeline startup if any required variable is missing or
 invalid. Do not reuse the Firebase service-account key.
 
 The access token is intended for short-lived in-memory use by web clients and
-Expo SecureStore for Expo clients. Future web refresh tokens must use
-appropriately configured HttpOnly, Secure cookies; Expo refresh tokens must use
-SecureStore. Never store refresh tokens in `localStorage`. Refresh tokens,
-session persistence, rotation, logout/revocation, and `/auth/refresh` are not
-implemented by this change.
+Expo SecureStore for Expo clients. Web refresh tokens use HttpOnly, Secure cookies;
+Expo refresh tokens use SecureStore. Raw refresh tokens are never stored in Firestore.
+
+## Authentication Endpoints
+
+1. `POST /auth/session`
+   - Accepts a Firebase ID token via `Authorization: Bearer <firebase-id-token>` or `access-token` cookie.
+   - Verifies identity via Firebase Admin SDK.
+   - Persists a session document to Firestore (`sessions/{sessionId}`) with an opaque session ID, token family ID, and SHA-256 hashed refresh token.
+   - Upserts verified user identity into Firestore `users/{uid}`.
+   - Issues a Lagertha access JWT (15-minute TTL) and a 7-day refresh token (`<sessionId>.<secret>`).
+   - For web clients, sets HttpOnly, Secure `refresh-token` and `access-token` cookies.
+
+2. `POST /auth/refresh`
+   - Accepts a refresh token via request body (`{ refreshToken }`), `refresh-token` cookie, or `x-refresh-token` header.
+   - Performs atomic token rotation in a Firestore transaction.
+   - Compares SHA-256 hash using constant-time comparison (`crypto.timingSafeEqual`).
+   - If a rotated or invalid token is presented (reuse detected), immediately revokes the session and returns `401 AUTH_TOKEN_REVOKED`.
+   - On success, rotates the refresh token secret, increments `refreshTokenVersion`, and issues a new Lagertha access JWT.
+
+3. `POST /auth/logout`
+   - Accepts a refresh token or session ID via request body, cookie, or header.
+   - Marks the session revoked (`revokedAt`, `revocationReason: LOGOUT`) in Firestore.
+   - Clears `access-token` and `refresh-token` cookies with expired `Max-Age=0`.
+
+4. `GET /auth/me`
+   - Protected by `lagertha-auth` policy; requires a valid Lagertha access JWT.
+   - Retrieves the user profile from `users/{uid}` and returns safe fields (`uid`, `displayName`, `photoURL`, `email`, `phoneNumber`, `preferences`, `profileStatus`).
+   - Never exposes tokens, secrets, or internal Firestore metadata.
+
 
 ## Authentication flow
 

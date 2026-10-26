@@ -52,7 +52,20 @@ const firebaseApp =
 
 const firebaseAuth = getAuth(firebaseApp);
 
+let firestoreInstance = null;
+function getFirestoreDb () {
+  if (!firestoreInstance) {
+    const { getFirestore } = require('firebase-admin/firestore');
+    firestoreInstance = getFirestore(firebaseApp);
+  }
+  return firestoreInstance;
+}
+
 module.exports = {
   firebaseApp,
   firebaseAuth,
+  getFirestoreDb,
+  get firestore () {
+    return getFirestoreDb();
+  }
 };

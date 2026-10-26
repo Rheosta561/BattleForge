@@ -1,0 +1,13 @@
+{
+  "name": "workout-service",
+  "version": "1.0.0",
+  "description": "Lagertha workout planning and logging microservice",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

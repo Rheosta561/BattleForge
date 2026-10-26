@@ -1,0 +1,13 @@
+{
+  "name": "community-service",
+  "version": "1.0.0",
+  "description": "Lagertha community, post, comment and feed microservice",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
+}

@@ -7,6 +7,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "start:dev": "node -r ./test/helpers/firebase-stub.js server.js",
     "test": "node --test",
     "check:firestore": "node scripts/check-firestore.js"
   },
