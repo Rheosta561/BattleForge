@@ -1,0 +1,34 @@
+http:
+  port: 8080
+admin:
+  port: 9876
+  host: localhost
+apiEndpoints:
+  user-api:
+    host: '*'
+    paths:
+      - '/users'
+      - '/users/*'
+  # see: http://www.express-gateway.io/docs/configuration/gateway.config.yml/apiEndpoints
+serviceEndpoints:
+  # see: http://www.express-gateway.io/docs/configuration/gateway.config.yml/serviceEndpoints
+  user-service:
+    url: 'http://localhost:3000'
+policies:
+  - basic-auth
+  - cors
+  - expression
+  - key-auth
+  - log
+  - oauth2
+  - proxy
+  - rate-limit
+pipelines:
+  # see: https://www.express-gateway.io/docs/configuration/gateway.config.yml/pipelines
+  user-pipeline:
+    apiEndpoints:
+      - user-api
+    policies:
+      - proxy:
+          - action:
+              serviceEndpoint: user-service
