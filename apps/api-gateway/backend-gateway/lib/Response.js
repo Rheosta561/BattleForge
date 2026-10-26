@@ -101,10 +101,24 @@ class ApiResponse {
   }
 }
 
-/** Inject the gateway request ID into `meta` when it is available. */
+/**
+ * Inject the gateway request ID into `meta` when it is available.
+ * `res.locals.standardResponseRequestId` is captured by the standardize
+ * middleware; fall back to the request itself, because express-gateway only
+ * creates `req.egContext` (which owns the request id) once the pipeline starts
+ * running — after that middleware has already executed.
+ */
 function attachRequestId(body, res) {
-  if (body && !body.meta && res.locals && res.locals.standardResponseRequestId) {
-    body.meta = { requestId: res.locals.standardResponseRequestId };
+  if (!body || body.meta) {
+    return;
+  }
+
+  const requestId =
+    (res.locals && res.locals.standardResponseRequestId) ||
+    (res.req && res.req.egContext && res.req.egContext.requestID);
+
+  if (requestId) {
+    body.meta = { requestId };
   }
 }
 

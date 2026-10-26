@@ -8,6 +8,8 @@ plugins:
   standard-response:
     package: ./plugins/standard-response
     exposeInternalErrors: false
+  firebase-auth:
+    package: ./plugins/firebase-auth
 
 crypto:
   cipherKey: sensitiveKey

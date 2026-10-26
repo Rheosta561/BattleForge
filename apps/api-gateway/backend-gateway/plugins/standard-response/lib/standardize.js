@@ -75,11 +75,21 @@ function standardizeResponses (req, res, next) {
         return ApiResponse.sendError(res, error);
       }
     }
-    return originalJson.call(this, payload);
+
+    // `res.json` serializes the payload and then delegates to `res.send`.
+    // Mark the payload as already serialized so the `res.send` patch below
+    // does not re-interpret the JSON string as an error message, which would
+    // recurse forever (json -> send -> sendError -> json ...).
+    res.standardResponseSerializing = true;
+    try {
+      return originalJson.call(this, payload);
+    } finally {
+      res.standardResponseSerializing = false;
+    }
   };
 
   res.send = function (payload) {
-    if (shouldNormalize()) {
+    if (!res.standardResponseSerializing && shouldNormalize()) {
       const error = toAppError(payload, res.statusCode);
       if (error) {
         return ApiResponse.sendError(res, error);

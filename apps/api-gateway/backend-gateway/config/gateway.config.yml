@@ -9,6 +9,7 @@ apiEndpoints:
     paths:
       - '/users'
       - '/users/*'
+      - '/health'
   # see: http://www.express-gateway.io/docs/configuration/gateway.config.yml/apiEndpoints
 serviceEndpoints:
   # see: http://www.express-gateway.io/docs/configuration/gateway.config.yml/serviceEndpoints
@@ -18,6 +19,7 @@ policies:
   - basic-auth
   - cors
   - expression
+  - firebase-auth
   - key-auth
   - log
   - oauth2
@@ -40,6 +42,13 @@ pipelines:
       - log:
           - action:
               message : "${req.method} ${req.originalUrl}"
+      - firebase-auth:
+          - action:
+              # Routes that skip Firebase verification: exact paths, or a
+              # trailing * prefix match (e.g. "/health*"). Authentication
+              # endpoints and other public routes go here.
+              publicPaths:
+                - '/health'
       - proxy:
           - action:
               serviceEndpoint: user-service
