@@ -1,0 +1,5 @@
+name: standard-response
+version: 1.0.0
+description: Standardized API response and error handling for the gateway
+policies:
+  - rate-limit

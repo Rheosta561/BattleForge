@@ -4,9 +4,10 @@ db:
     emulate: true
     namespace: EG
 
-# plugins:
-  # express-gateway-plugin-example:
-  #   param1: 'param from system.config' 
+plugins:
+  standard-response:
+    package: ./plugins/standard-response
+    exposeInternalErrors: false
 
 crypto:
   cipherKey: sensitiveKey

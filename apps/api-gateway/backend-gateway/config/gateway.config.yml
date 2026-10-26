@@ -29,6 +29,17 @@ pipelines:
     apiEndpoints:
       - user-api
     policies:
+      - rate-limit:
+          - action:
+               max: 10
+               windowMs: 60000
+               delayAfter: 0
+               delayMs: 0
+               statusCode: 429
+               headers: true
+      - log:
+          - action:
+              message : "${req.method} ${req.originalUrl}"
       - proxy:
           - action:
               serviceEndpoint: user-service
